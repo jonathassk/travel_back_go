@@ -19,7 +19,8 @@ func NewApiServer(addr string, db *sql.DB) *ApiServer {
 func (s *ApiServer) Run() error {
 	router := mux.NewRouter()
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
-	userHandler := user.NewHandler()
+	userStore := user.NewStore(s.db)
+	userHandler := user.NewHandler(userStore)
 	userHandler.RegisterRoutes(subRouter)
 
 	return http.ListenAndServe(s.addr, router)
