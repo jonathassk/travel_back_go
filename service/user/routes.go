@@ -1,6 +1,8 @@
 package user
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/jonathassk/travel_back_go/types"
 	"github.com/jonathassk/travel_back_go/utils"
@@ -21,11 +23,19 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 }
 
 func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
+	// get request body
+	var payload types.RegistrationType
+	err := json.NewDecoder(r.Body).Decode(&payload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	fmt.Fprintf(w, "User registered: %+v", payload)
 }
 
 func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 	var payload types.RegistrationType
-	if err := utils.ParseJson(r, payload); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		utils.WriteError(w, http.StatusBadRequest, err)
 	}
 

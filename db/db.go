@@ -43,7 +43,7 @@ func ConnectDb() (*sql.DB, error) {
 	}
 
 	//create table
-	result, err := db.Exec(`CREATE TABLE IF NOT EXISTS users ("id" SERIAL PRIMARY KEY, "name" VARCHAR(100), "email" VARCHAR(100), "password" VARCHAR(100))`)
+	result, err := db.Exec(`CREATE TABLE IF NOT EXISTS users ("id" SERIAL PRIMARY KEY, "first_name" VARCHAR(50), "last_name" VARCHAR(100), "email" VARCHAR(100), "password" VARCHAR(100), "city" VARCHAR(50), "country" VARCHAR(3), "currency" VARCHAR(3), "language" VARCHAR(5), created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`)
 	if err != nil {
 		log.Fatal(err)
 	}
