@@ -45,6 +45,10 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	token, err := utils.CreateNewToken(payload.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
 
 	err = utils.WriteJson(w, http.StatusOK, "login successful, token: "+token)
 	if err != nil {
@@ -63,8 +67,8 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
-	userEmail, err := h.store.GetUserByEmail(payload.Email)
 
+	userEmail, err := h.store.GetUserByEmail(payload.Email)
 	if userEmail != nil {
 		utils.WriteError(w, http.StatusConflict, fmt.Errorf("user with email %s already exists", payload.Email))
 		return
@@ -75,7 +79,19 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return
 	}
-	err = utils.WriteJson(w, http.StatusCreated, user)
+
+	token, err := utils.CreateNewToken(payload.Email)
+	if err != nil {
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	result := map[string]interface{}{
+		"user":  user,
+		"token": token,
+	}
+
+	err = utils.WriteJson(w, http.StatusCreated, result)
 	if err != nil {
 		return
 	}
