@@ -44,7 +44,9 @@ func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = utils.WriteJson(w, http.StatusOK, "login successful")
+	token, err := utils.CreateNewToken(payload.Email)
+
+	err = utils.WriteJson(w, http.StatusOK, "login successful, token: "+token)
 	if err != nil {
 		return
 	}
