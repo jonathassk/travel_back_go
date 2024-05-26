@@ -22,6 +22,7 @@ func NewHandler(store types.UserStore) *Handler {
 func (h *Handler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/login", h.login).Methods("POST")
 	router.HandleFunc("/register", h.register).Methods("POST")
+	router.HandleFunc("/update", h.UpdateUser).Methods("PUT")
 }
 
 func (h *Handler) login(w http.ResponseWriter, r *http.Request) {
@@ -98,11 +99,32 @@ func (h *Handler) register(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (h *Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		utils.WriteError(w, http.StatusUnauthorized, fmt.Errorf("no token provided"))
+		return
+	}
+	tokenString = tokenString[7:] // remove "Bearer " from token
+	err := utils.VerifyToken(tokenString)
+	if err != nil {
+		utils.WriteError(w, http.StatusUnauthorized, err)
+		return
+	}
+
+	err = utils.WriteJson(w, http.StatusOK, "user updated")
+	if err != nil {
+		return
+	}
+	return
+}
+
 func verifyUserPayload(payload types.RegistrationType) error {
 	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	for _, field := range []string{payload.FirstName, payload.LastName, payload.Email, payload.Password, payload.City, payload.Country, payload.Currency, payload.Language} {
-		if len(field) < 3 {
-			return fmt.Errorf("all fields must have at least 3 characters")
+		if len(field) < 2 {
+			return fmt.Errorf("all fields must have at least 2 characters")
 		}
 	}
 	if payload.Language[2] != '-' {
