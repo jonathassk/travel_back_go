@@ -2,28 +2,13 @@ package user
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/jonathassk/travel_back_go/service/auth"
 	"github.com/jonathassk/travel_back_go/types"
-	"log"
 )
 
 type Store struct {
 	db *sql.DB
-}
-
-func (s *Store) GetUserById(id int) (*types.User, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *Store) DeleteUser(id int) error {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (s *Store) UpdateUser(u *types.User) (*types.User, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func NewStore(db *sql.DB) *Store {
@@ -46,7 +31,9 @@ func (s *Store) CreateUser(u *types.RegistrationType) (*types.User, error) {
 		Currency:  u.Currency,
 		Language:  u.Language,
 	}
-
+	if err != nil {
+		return nil, err
+	}
 	_, err = s.db.Exec("INSERT INTO users (first_name, last_name, email, password, city, country, currency, language) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
 		user.FirstName, user.LastName, user.Email, hashedPassword, user.City, user.Country, user.Currency, user.Language)
 	if err != nil {
@@ -55,16 +42,13 @@ func (s *Store) CreateUser(u *types.RegistrationType) (*types.User, error) {
 	return user, nil
 }
 
-func hashPassword(password string) (interface{}, interface{}) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (s *Store) GetUserByEmail(email string) (*types.User, error) {
-	rows, err := s.db.Query("SELECT * FROM users WHERE email = ?", email)
+	rows, err := s.db.Query("SELECT * FROM users WHERE email = $1", email)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+
 	u := new(types.User)
 	for rows.Next() {
 		u, err = scanRowIntoUser(rows)
@@ -72,10 +56,8 @@ func (s *Store) GetUserByEmail(email string) (*types.User, error) {
 			return nil, err
 		}
 	}
-
 	if u.ID == 0 {
-		log.Println("user not found")
-		return nil, nil
+		return nil, fmt.Errorf("user not found")
 	}
 	return u, nil
 }

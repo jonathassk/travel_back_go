@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
+	_ "github.com/lib/pq"
 	"log"
 )
 
@@ -49,5 +50,16 @@ func ConnectDb() (*sql.DB, error) {
 	}
 	print(result.RowsAffected())
 	fmt.Println("Connected to RDS")
+	if err != nil {
+		return nil, err
+	}
 	return db, nil
+}
+
+func CloseDb(db *sql.DB) {
+	err := db.Close()
+	if err != nil {
+		log.Println(err)
+	}
+	fmt.Println("Connection closed")
 }

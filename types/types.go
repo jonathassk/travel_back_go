@@ -11,6 +11,11 @@ type RegistrationType struct {
 	Language  string `json:"language"`
 }
 
+type LoginType struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 type User struct {
 	ID        int    `json:"id"`
 	FirstName string `json:"first_name"`
@@ -27,8 +32,5 @@ type User struct {
 
 type UserStore interface {
 	GetUserByEmail(email string) (*User, error)
-	GetUserById(id int) (*User, error)
 	CreateUser(u *RegistrationType) (*User, error)
-	DeleteUser(id int) error
-	UpdateUser(u *User) (*User, error)
 }
